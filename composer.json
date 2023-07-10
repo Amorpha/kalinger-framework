@@ -1,0 +1,17 @@
+{
+    "name": "amorpha/kalinger-framework",
+    "description": "My super-duper framework",
+    "type": "project",
+    "autoload": {
+        "psr-4": {
+            "Kalinger\\": "framework/src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Roman Kalinger"
+        }
+    ],
+    "minimum-stability": "beta",
+    "require": {}
+}
