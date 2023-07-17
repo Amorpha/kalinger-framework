@@ -298,7 +298,7 @@ class Router
         $this->config['site_language'] = $siteLanguage;
 
         // Удаляем гет параметры из uri
-        $url = preg_replace('/\\?.*/', '', $url);
+        $url = rtrim(preg_replace('/\\?.*/', '', $url),'/');
 
         return $url;
 
