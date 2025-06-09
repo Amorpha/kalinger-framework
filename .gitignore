@@ -1,2 +1,5 @@
 .idea
 !.gitignore
+.DS_Store
+.vscode
+vendor

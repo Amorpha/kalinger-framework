@@ -30,6 +30,8 @@ class Router
         $this->ip_user = $this->getIpUser();
         $this->user_info = $this->getIpInfo($this->ip_user);
 
+        $this->normalizeUri();
+
         if ($this->config['whoops']['enable']) {
 
             ini_set('display_errors', 1);
@@ -70,6 +72,33 @@ class Router
         }
 
 //        print_r($this->routes);
+    }
+
+    protected function normalizeUri()
+    {
+        $uri = $_SERVER['REQUEST_URI'];
+
+        // Отделяем query string (если есть)
+        $parsed_url = parse_url($uri);
+        $path = $parsed_url['path'];
+        $query = isset($parsed_url['query']) ? '?' . $parsed_url['query'] : '';
+
+        // Удаляем повторяющиеся слэши: /page////test -> /page/test
+        $path = preg_replace('#/+#', '/', $path);
+
+        // Если это не корень сайта и путь не заканчивается на /
+        if ($path !== '/' && substr($path, -1) !== '/') {
+            $path .= '/';
+        }
+
+        // Финальный URI
+        $normalized = $path . $query;
+
+        // Если отличается от текущего — редирект
+        if ($uri !== $normalized) {
+            header("Location: " . $this->getProtocol() . $_SERVER['HTTP_HOST'] . $normalized, true, 301);
+            exit;
+        }
     }
 
     public function add($route, $params)
