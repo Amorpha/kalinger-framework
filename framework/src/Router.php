@@ -77,26 +77,46 @@ class Router
     protected function normalizeUri()
     {
         $uri = $_SERVER['REQUEST_URI'];
+        $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
 
-        // Отделяем query string (если есть)
-        $parsed_url = parse_url($uri);
-        $path = $parsed_url['path'];
-        $query = isset($parsed_url['query']) ? '?' . $parsed_url['query'] : '';
+        // Признак AJAX-запроса через заголовок
+        $isAjaxHeader = !empty($_SERVER['HTTP_X_REQUESTED_WITH'])
+            && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
 
-        // Удаляем повторяющиеся слэши: /page////test -> /page/test
+        // Признак AJAX-запроса через слово "ajax" в URI (в пути или в query)
+        $isAjaxInUri = stripos($uri, 'ajax') !== false;
+
+        // Если AJAX (через заголовок или в URL) — не редиректим
+        if ($isAjaxHeader || $isAjaxInUri) {
+            return;
+        }
+
+        // Парсим URI
+        $parsedUrl = parse_url($uri);
+        $path = $parsedUrl['path'] ?? '/';
+        $query = isset($parsedUrl['query']) ? '?' . $parsedUrl['query'] : '';
+
+        // Исключаем нормализацию для API (пример: /api/...)
+        if (stripos($path, '/api/') === 0) {
+            return;
+        }
+
+        // Убираем множественные слэши подряд
         $path = preg_replace('#/+#', '/', $path);
 
-        // Если это не корень сайта и путь не заканчивается на /
+        // Добавляем слэш в конце, если это не корень и не заканчивается на слэш
         if ($path !== '/' && substr($path, -1) !== '/') {
             $path .= '/';
         }
 
-        // Финальный URI
         $normalized = $path . $query;
 
-        // Если отличается от текущего — редирект
+        // Если URI отличается — редирект с кодом 308 (сохраняет метод и тело)
         if ($uri !== $normalized) {
-            header("Location: " . $this->getProtocol() . $_SERVER['HTTP_HOST'] . $normalized, true, 301);
+            $protocol = $this->getProtocol(); // например, https://
+            $host = $_SERVER['HTTP_HOST'];
+
+            header("Location: " . $protocol . $host . $normalized, true, 308);
             exit;
         }
     }
