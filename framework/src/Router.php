@@ -83,42 +83,42 @@ class Router
         $isAjaxHeader = !empty($_SERVER['HTTP_X_REQUESTED_WITH'])
             && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
 
-        // Признак AJAX-запроса через слово "ajax" в URI (в пути или в query)
+        // Признак AJAX-запроса через URI
         $isAjaxInUri = stripos($uri, 'ajax') !== false;
 
-        // Если AJAX (через заголовок или в URL) — не редиректим
-        if ($isAjaxHeader || $isAjaxInUri) {
-            return;
-        }
-
-        // Парсим URI
+        // Признак API-запроса
         $parsedUrl = parse_url($uri);
         $path = $parsedUrl['path'] ?? '/';
         $query = isset($parsedUrl['query']) ? '?' . $parsedUrl['query'] : '';
+        $isApiRequest = stripos($path, '/api/') === 0;
 
-        // Исключаем нормализацию для API (пример: /api/...)
-        if (stripos($path, '/api/') === 0) {
-            return;
-        }
-
-        // Убираем множественные слэши подряд
+        // Убираем множественные слэши
         $path = preg_replace('#/+#', '/', $path);
 
-        // Добавляем слэш в конце, если это не корень и не заканчивается на слэш
+        // Добавляем завершающий слэш, если нужно
         if ($path !== '/' && substr($path, -1) !== '/') {
             $path .= '/';
         }
 
+        // Собираем нормализованный URI
         $normalized = $path . $query;
 
-        // Если URI отличается — редирект с кодом 308 (сохраняет метод и тело)
-        if ($uri !== $normalized) {
-            $protocol = $this->getProtocol(); // например, https://
-            $host = $_SERVER['HTTP_HOST'];
-
-            header("Location: " . $protocol . $host . $normalized, true, 308);
-            exit;
+        // Если URI уже нормализован — выходим
+        if ($uri === $normalized) {
+            return;
         }
+
+        // Определяем тип редиректа
+        $isSpecial = $isAjaxHeader || $isAjaxInUri || $isApiRequest;
+        $redirectCode = $isSpecial ? 308 : 301;
+
+        // Редиректим
+        $protocol = $this->getProtocol(); // например, https://
+        $host = $_SERVER['HTTP_HOST'];
+        $location = $protocol . $host . $normalized;
+
+        header("Location: $location", true, $redirectCode);
+        exit;
     }
 
     public function add($route, $params)
