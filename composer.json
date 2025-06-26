@@ -1,7 +1,7 @@
 {
     "name": "amorpha/kalinger-framework",
-    "description": "My super-duper framework",
-    "type": "project",
+    "description": "Kalinger — это фреймворк для разработчика, а не для маркетинга",
+    "type": "library",
     "autoload": {
         "psr-4": {
             "Kalinger\\": "framework/src/"
@@ -9,9 +9,22 @@
     },
     "authors": [
         {
-            "name": "Roman Kalinger"
+            "name": "Roman Kalinger",
+            "role": "Owner, Developer, Creator, Beekeeper"
+        },
+        {
+            "name": "Denis Chichmarev",
+            "role": "Heir, Developer"
+        },
+        {
+            "name": "Kirill Zolotarev",
+            "role": "PHP tech consultant, Creator Transaction, The father of the Guzzle Package"
         }
     ],
     "minimum-stability": "beta",
-    "require": {}
+    "require": {
+        "php": ">=8.0",
+        "monolog/monolog": "^3.9",
+      "ext-curl": "*"
+    }
 }
