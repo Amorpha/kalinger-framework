@@ -24,8 +24,14 @@
     "minimum-stability": "beta",
     "require": {
         "php": ">=8.0",
+<<<<<<< KALF-2
         "monolog/monolog": "2.10.0",
         "ext-curl": "*",
         "psr/log": "^1.0.1 || ^2.0"
+=======
+        "monolog/monolog": "^3.9",
+        "ext-curl": "*",
+        "psr/log": "^2.0"
+>>>>>>> develop
     }
 }
