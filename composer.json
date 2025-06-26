@@ -25,6 +25,7 @@
     "require": {
         "php": ">=8.0",
         "monolog/monolog": "^3.9",
-      "ext-curl": "*"
+        "ext-curl": "*",
+        "psr/log": "^2.0"
     }
 }
