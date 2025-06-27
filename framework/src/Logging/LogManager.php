@@ -1,42 +1,25 @@
 <?php
 namespace Kalinger\Logging;
 
-use Psr\Log\LoggerInterface;
+use Kalinger\Logging\LoggerFactory;
+use Monolog\Logger;
 
 class LogManager
 {
-    protected static ?self $instance = null;
-    protected array $channels = [];
-    protected array $config;
+    protected static ?array $channels = null;
 
-    private function __construct()
+    public static function channel(string $name = 'default'): Logger
     {
-        $this->config = require ROOT . '/config/logging.php';
-    }
-
-    public static function get(): self
-    {
-        return self::$instance ??= new self();
-    }
-
-    public function channel(string $name = null): LoggerInterface
-    {
-        $name ??= $this->config['default'];
-
-        if (!isset($this->channels[$name])) {
-            $this->channels[$name] = LoggerFactory::create($name, $this->config);
+        if (self::$channels === null) {
+            $configPath = APPLICATION . '/config/logging.php';
+            self::$channels = require $configPath;
         }
 
-        return $this->channels[$name];
+        return LoggerFactory::create($name, self::$channels);
     }
 
-    public function __call(string $method, array $args)
+    public static function default(): Logger
     {
-        return $this->channel()->$method(...$args);
-    }
-
-    public static function __callStatic(string $method, array $args)
-    {
-        return self::get()->channel()->$method(...$args);
+        return self::channel('default');
     }
 }
